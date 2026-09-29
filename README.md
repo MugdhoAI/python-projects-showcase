@@ -1,21 +1,19 @@
-# 🚀 Python Utility Projects Showcase
+# Python Utility Projects Showcase
 
-Welcome! This repository features a quick video demo and full documentation for two of my recent Python projects.
+This repository contains documentation and a video demo for two Python projects.
 
----
+## Project Demo and Overview
 
-## 📽️ Project Demo & Overview
-<!-- Drag and drop your video file here again, or link it if uploaded -->
+### Full Documentation
 
-### 📄 Full Documentation
-* [Download / View the Project PDF Guide](./your-pdf-file-name.pdf)
+[Download or view the project PDF guide](./your-pdf-file-name.pdf)
 
----
+## Projects
 
-## 🛠️ The Projects
+### 1. WiFi QR Code Generator
 
-### 1. 📶 [WiFi QR Code Generator](https://github.com/MugdhoAI/wifi-qr-generator)
-*A Python script to generate scannable QR codes for quick WiFi network connection.*
+A Python script that generates scannable QR codes for quick WiFi network connections.
 
-### 2. 📁 [File Organizer](https://github.com/MugdhoAI/file-organizer)
-*An automated script to clean up cluttered directories by sorting files into dedicated folders.*
+### 2. File Organizer
+
+A Python script that cleans up cluttered directories by sorting files into dedicated folders.
