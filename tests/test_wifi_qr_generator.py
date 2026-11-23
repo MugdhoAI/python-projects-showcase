@@ -33,6 +33,12 @@ def test_empty_ssid_rejected():
         build_wifi_payload("  ", "pw")
 
 
+def test_ssid_length_limit():
+    assert build_wifi_payload("a" * 32, "pw").startswith("WIFI:T:WPA;S:")
+    with pytest.raises(ValueError):
+        build_wifi_payload("a" * 33, "pw")
+
+
 def test_unknown_security_rejected():
     with pytest.raises(ValueError):
         build_wifi_payload("Net", "pw", security="WPA3")

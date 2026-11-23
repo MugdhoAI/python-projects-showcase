@@ -40,12 +40,14 @@ def build_wifi_payload(
     """Build a validated ``WIFI:`` payload string.
 
     Raises:
-        ValueError: if the SSID is empty, the security type is unknown,
-            or a password is supplied for an open network (or missing
-            for a secured one).
+        ValueError: if the SSID is empty or longer than 32 octets, the
+            security type is unknown, or a password is supplied for an
+            open network (or missing for a secured one).
     """
     if not ssid or not ssid.strip():
         raise ValueError("SSID must not be empty")
+    if len(ssid.encode("utf-8")) > 32:
+        raise ValueError("SSID must be at most 32 octets")
     security = _CANONICAL.get(security.upper(), security.upper())
     if security.upper() not in SECURITY_TYPES:
         raise ValueError(
