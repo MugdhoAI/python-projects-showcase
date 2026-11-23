@@ -26,6 +26,21 @@ SECURITY_TYPES = ("WPA", "WEP", "NOPASS")
 _CANONICAL = {"NOPASS": "nopass"}
 
 
+def _is_valid_wep_key(key: str) -> bool:
+    """Return True if *key* is a usable WEP key.
+
+    A WEP key is 5 or 13 printable ASCII characters, or 10 or 26
+    hexadecimal digits.
+    """
+    if len(key) in (5, 13) and all(32 <= ord(char) <= 126 for char in key):
+        return True
+    if len(key) in (10, 26) and all(
+        char in "0123456789abcdefABCDEF" for char in key
+    ):
+        return True
+    return False
+
+
 def escape_wifi_value(value: str) -> str:
     """Return *value* with ZXing special characters backslash escaped."""
     return "".join(f"\\{char}" if char in SPECIAL_CHARS else char for char in value)
@@ -57,6 +72,11 @@ def build_wifi_payload(
         raise ValueError("an open (nopass) network must not have a password")
     if security != "nopass" and not password:
         raise ValueError(f"a {security} network requires a password")
+    if security == "WEP" and not _is_valid_wep_key(password):
+        raise ValueError(
+            "a WEP key must be 5 or 13 ASCII characters, "
+            "or 10 or 26 hex digits"
+        )
 
     fields = [f"T:{security}", f"S:{escape_wifi_value(ssid)}"]
     if security != "nopass":

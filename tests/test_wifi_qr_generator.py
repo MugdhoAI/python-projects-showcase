@@ -44,6 +44,22 @@ def test_unknown_security_rejected():
         build_wifi_payload("Net", "pw", security="WPA3")
 
 
+def test_wep_key_rules():
+    assert (
+        build_wifi_payload("Net", "abcde", security="WEP")
+        == "WIFI:T:WEP;S:Net;P:abcde;H:false;;"
+    )
+    assert build_wifi_payload("Net", "0123456789", security="WEP")
+    assert build_wifi_payload("Net", "0123456789abc", security="WEP")
+    assert build_wifi_payload(
+        "Net", "0123456789abcdef0123456789", security="WEP"
+    )
+    with pytest.raises(ValueError):
+        build_wifi_payload("Net", "abc", security="WEP")
+    with pytest.raises(ValueError):
+        build_wifi_payload("Net", "toolongpassword!", security="WEP")
+
+
 def test_password_rules():
     with pytest.raises(ValueError):
         build_wifi_payload("Net", security="WPA")
