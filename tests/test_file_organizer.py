@@ -135,6 +135,21 @@ def test_cli_dry_run_summary_says_planned(tmp_path, capsys):
     assert (tmp_path / "a.png").is_file()
 
 
+def test_cli_organizes_end_to_end(tmp_path, capsys):
+    make_files(tmp_path, ["a.png", "b.txt"])
+    assert main([str(tmp_path)]) == 0
+    out = capsys.readouterr().out
+    assert "moved: a.png -> Images/a.png" in out
+    assert "moved: b.txt -> Documents/b.txt" in out
+    assert (tmp_path / "Images" / "a.png").is_file()
+    assert (tmp_path / "Documents" / "b.txt").is_file()
+
+
+def test_cli_missing_directory_returns_error(tmp_path, capsys):
+    assert main([str(tmp_path / "does-not-exist")]) == 2
+    assert "error:" in capsys.readouterr().err
+
+
 def test_recursive_dry_run_changes_nothing(tmp_path):
     (tmp_path / "nested").mkdir()
     (tmp_path / "nested" / "photo.png").write_text("x", encoding="utf-8")
