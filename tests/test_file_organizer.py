@@ -19,6 +19,13 @@ def test_get_category_by_extension():
     assert get_category(Path("app.py")) == "Code"
     assert get_category(Path("mystery.xyz")) == "Other"
     assert get_category(Path("no_extension")) == "Other"
+    assert get_category(Path("sheet.xlsx")) == "Documents"
+    assert get_category(Path("data.csv")) == "Documents"
+    assert get_category(Path("book.epub")) == "Documents"
+    assert get_category(Path("scan.tiff")) == "Images"
+    assert get_category(Path("icon.ico")) == "Images"
+    assert get_category(Path("voice.aac")) == "Audio"
+    assert get_category(Path("movie.flv")) == "Video"
 
 
 def test_organize_moves_files_into_categories(tmp_path):

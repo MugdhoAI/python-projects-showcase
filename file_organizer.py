@@ -14,10 +14,12 @@ import sys
 from pathlib import Path
 
 CATEGORIES: dict[str, set[str]] = {
-    "Images": {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg", ".webp"},
-    "Documents": {".pdf", ".doc", ".docx", ".txt", ".md", ".odt", ".rtf"},
-    "Audio": {".mp3", ".wav", ".flac", ".ogg", ".m4a"},
-    "Video": {".mp4", ".mkv", ".mov", ".avi", ".webm"},
+    "Images": {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg", ".webp",
+               ".tif", ".tiff", ".ico", ".heic"},
+    "Documents": {".pdf", ".doc", ".docx", ".txt", ".md", ".odt", ".rtf",
+                  ".xls", ".xlsx", ".ppt", ".pptx", ".csv", ".epub"},
+    "Audio": {".mp3", ".wav", ".flac", ".ogg", ".m4a", ".aac"},
+    "Video": {".mp4", ".mkv", ".mov", ".avi", ".webm", ".flv", ".wmv"},
     "Archives": {".zip", ".tar", ".gz", ".bz2", ".xz", ".7z", ".rar"},
     "Code": {".py", ".js", ".ts", ".html", ".css", ".json", ".c", ".cpp", ".java"},
 }
