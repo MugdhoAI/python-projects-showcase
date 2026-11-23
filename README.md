@@ -14,7 +14,7 @@ Video demo: [The Design Patterns of Pro Python Projects](./The_Design_Patterns_o
 
 ### 1. WiFi QR Code Generator
 
-`wifi_qr_generator.py` builds a scannable WiFi QR payload in the ZXing `WIFI:` format, with correct escaping of special characters in the network name and password, validation of the security type and password rules, and an optional PNG export.
+`wifi_qr_generator.py` builds a scannable WiFi QR payload in the ZXing `WIFI:` format, with correct escaping of special characters in the network name and password, validation of the security type and password rules, and an optional PNG export. SSIDs are limited to 32 octets, and WEP keys must be 5 or 13 ASCII characters, or 10 or 26 hex digits.
 
 ```bash
 python wifi_qr_generator.py HomeNet secret123
@@ -26,11 +26,12 @@ python wifi_qr_generator.py Cafe --security nopass
 
 ### 2. File Organizer
 
-`file_organizer.py` cleans up a cluttered directory by sorting its files into category folders (Images, Documents, Audio, Video, Archives, Code, Other). It never overwrites an existing file, leaves subdirectories alone, and supports a dry run preview.
+`file_organizer.py` cleans up a cluttered directory by sorting its files into category folders (Images, Documents, Audio, Video, Archives, Code, Other). It never overwrites an existing file, leaves subdirectories alone, and supports a dry run preview. With `--recursive` it organizes files in subfolders too, moving them up into the top level category folders while leaving files that are already organized where they are. After a run it prints a per-category summary.
 
 ```bash
 python file_organizer.py ~/Downloads --dry-run   # preview the moves
 python file_organizer.py ~/Downloads             # do the sorting
+python file_organizer.py ~/Downloads --recursive # include subfolders
 ```
 
 ## Tests
