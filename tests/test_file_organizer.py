@@ -77,3 +77,50 @@ def test_unique_destination_suffixes():
 def test_missing_directory_rejected(tmp_path):
     with pytest.raises(NotADirectoryError):
         organize_directory(tmp_path / "does-not-exist")
+
+
+def test_recursive_organizes_nested_files(tmp_path):
+    (tmp_path / "nested" / "deep").mkdir(parents=True)
+    (tmp_path / "nested" / "photo.png").write_text("x", encoding="utf-8")
+    (tmp_path / "nested" / "deep" / "notes.txt").write_text("x", encoding="utf-8")
+    make_files(tmp_path, ["top.mp3"])
+    moves = organize_directory(tmp_path, recursive=True)
+    assert len(moves) == 3
+    assert (tmp_path / "Images" / "photo.png").is_file()
+    assert (tmp_path / "Documents" / "notes.txt").is_file()
+    assert (tmp_path / "Audio" / "top.mp3").is_file()
+
+
+def test_recursive_leaves_already_organized_files(tmp_path):
+    (tmp_path / "Images").mkdir()
+    (tmp_path / "Images" / "done.png").write_text("x", encoding="utf-8")
+    (tmp_path / "nested").mkdir()
+    (tmp_path / "nested" / "new.png").write_text("x", encoding="utf-8")
+    moves = organize_directory(tmp_path, recursive=True)
+    assert len(moves) == 1
+    assert (tmp_path / "Images" / "done.png").is_file()
+    assert (tmp_path / "Images" / "new.png").is_file()
+
+
+def test_recursive_keeps_same_named_files_from_different_folders(tmp_path):
+    (tmp_path / "one").mkdir()
+    (tmp_path / "two").mkdir()
+    (tmp_path / "one" / "notes.txt").write_text("one", encoding="utf-8")
+    (tmp_path / "two" / "notes.txt").write_text("two", encoding="utf-8")
+    organize_directory(tmp_path, recursive=True)
+    assert (tmp_path / "Documents" / "notes.txt").is_file()
+    assert (tmp_path / "Documents" / "notes_1.txt").is_file()
+    contents = {
+        (tmp_path / "Documents" / "notes.txt").read_text(encoding="utf-8"),
+        (tmp_path / "Documents" / "notes_1.txt").read_text(encoding="utf-8"),
+    }
+    assert contents == {"one", "two"}
+
+
+def test_recursive_dry_run_changes_nothing(tmp_path):
+    (tmp_path / "nested").mkdir()
+    (tmp_path / "nested" / "photo.png").write_text("x", encoding="utf-8")
+    moves = organize_directory(tmp_path, dry_run=True, recursive=True)
+    assert len(moves) == 1
+    assert (tmp_path / "nested" / "photo.png").is_file()
+    assert not (tmp_path / "Images").exists()

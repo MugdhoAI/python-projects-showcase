@@ -36,35 +36,68 @@ def get_category(path: Path) -> str:
     return DEFAULT_CATEGORY
 
 
-def unique_destination(destination: Path) -> Path:
-    """Return *destination*, or a ``name_1`` style variant if it exists."""
-    if not destination.exists():
+def unique_destination(destination: Path, taken: set[Path] | None = None) -> Path:
+    """Return *destination*, or a ``name_1`` style variant if it exists.
+
+    Destinations already reserved in *taken* (planned moves that have
+    not happened yet) count as taken too, so two same named files from
+    different folders never plan onto the same path.
+    """
+    taken = taken if taken is not None else set()
+    if destination not in taken and not destination.exists():
         return destination
     stem, suffix = destination.stem, destination.suffix
     counter = 1
     while True:
         candidate = destination.with_name(f"{stem}_{counter}{suffix}")
-        if not candidate.exists():
+        if candidate not in taken and not candidate.exists():
             return candidate
         counter += 1
 
 
-def plan_moves(directory: Path) -> list[tuple[Path, Path]]:
-    """Return the (source, destination) moves organizing *directory* would make."""
+def _already_organized(directory: Path, path: Path) -> bool:
+    """Return True if *path* already sits in a top level category folder."""
+    return (
+        path.parent.parent == directory
+        and path.parent.name in set(CATEGORIES) | {DEFAULT_CATEGORY}
+    )
+
+
+def plan_moves(directory: Path, recursive: bool = False) -> list[tuple[Path, Path]]:
+    """Return the (source, destination) moves organizing *directory* would make.
+
+    With ``recursive=True`` files in subfolders are moved up into the top
+    level category folders too, except files that are already organized.
+    """
+    directory = Path(directory)
+    if recursive:
+        entries = sorted(entry for entry in directory.rglob("*") if entry.is_file())
+    else:
+        entries = sorted(directory.iterdir())
     moves = []
-    for entry in sorted(directory.iterdir()):
+    planned: set[Path] = set()
+    for entry in entries:
         if not entry.is_file():
             continue
+        if recursive and _already_organized(directory, entry):
+            continue
         target_dir = directory / get_category(entry)
-        moves.append((entry, unique_destination(target_dir / entry.name)))
+        destination = unique_destination(target_dir / entry.name, planned)
+        if destination == entry:
+            continue
+        planned.add(destination)
+        moves.append((entry, destination))
     return moves
 
 
-def organize_directory(directory: Path, dry_run: bool = False) -> list[tuple[Path, Path]]:
+def organize_directory(
+    directory: Path, dry_run: bool = False, recursive: bool = False
+) -> list[tuple[Path, Path]]:
     """Move files in *directory* into category folders and return the moves.
 
     With ``dry_run=True`` nothing is created or moved; the planned moves
-    are returned instead.
+    are returned instead. With ``recursive=True`` files in subfolders
+    are organized too.
 
     Raises:
         NotADirectoryError: if *directory* does not exist or is not a folder.
@@ -72,7 +105,7 @@ def organize_directory(directory: Path, dry_run: bool = False) -> list[tuple[Pat
     directory = Path(directory)
     if not directory.is_dir():
         raise NotADirectoryError(f"not a directory: {directory}")
-    moves = plan_moves(directory)
+    moves = plan_moves(directory, recursive=recursive)
     if dry_run:
         return moves
     for source, destination in moves:
@@ -87,10 +120,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--dry-run", action="store_true", help="print planned moves, change nothing"
     )
+    parser.add_argument(
+        "--recursive",
+        action="store_true",
+        help="organize files in subfolders too",
+    )
     args = parser.parse_args(argv)
 
     try:
-        moves = organize_directory(Path(args.directory), dry_run=args.dry_run)
+        moves = organize_directory(
+            Path(args.directory), dry_run=args.dry_run, recursive=args.recursive
+        )
     except NotADirectoryError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
