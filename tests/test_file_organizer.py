@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from file_organizer import get_category, organize_directory, unique_destination
+from file_organizer import get_category, main, organize_directory, unique_destination
 
 
 def make_files(root: Path, names: list[str]) -> None:
@@ -115,6 +115,24 @@ def test_recursive_keeps_same_named_files_from_different_folders(tmp_path):
         (tmp_path / "Documents" / "notes_1.txt").read_text(encoding="utf-8"),
     }
     assert contents == {"one", "two"}
+
+
+def test_cli_prints_per_category_summary(tmp_path, capsys):
+    make_files(tmp_path, ["a.png", "b.png", "c.txt"])
+    assert main([str(tmp_path)]) == 0
+    out = capsys.readouterr().out
+    assert "Images: 2 file(s)" in out
+    assert "Documents: 1 file(s)" in out
+    assert "3 file(s) organized" in out
+
+
+def test_cli_dry_run_summary_says_planned(tmp_path, capsys):
+    make_files(tmp_path, ["a.png"])
+    assert main([str(tmp_path), "--dry-run"]) == 0
+    out = capsys.readouterr().out
+    assert "Images: 1 file(s)" in out
+    assert "1 file(s) planned" in out
+    assert (tmp_path / "a.png").is_file()
 
 
 def test_recursive_dry_run_changes_nothing(tmp_path):

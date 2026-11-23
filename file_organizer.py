@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import shutil
 import sys
+from collections import Counter
 from pathlib import Path
 
 CATEGORIES: dict[str, set[str]] = {
@@ -137,6 +138,9 @@ def main(argv: list[str] | None = None) -> int:
     for source, destination in moves:
         prefix = "would move" if args.dry_run else "moved"
         print(f"{prefix}: {source.name} -> {destination.parent.name}/{destination.name}")
+    counts = Counter(destination.parent.name for _, destination in moves)
+    for category in sorted(counts):
+        print(f"{category}: {counts[category]} file(s)")
     print(f"{len(moves)} file(s) {'planned' if args.dry_run else 'organized'}")
     return 0
 
